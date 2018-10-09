@@ -1,4 +1,6 @@
 #include <iostream>
+#include <unistd.h>
+
 
 using namespace std;
 
@@ -15,8 +17,12 @@ int main(int argc, char *argv[]){
   string functions[] = {"cd","clr","dir","environ","echo","help","pause","quit"};
   while(loop != -1){
 
+    String cwd = getcwd(cwd);
+
+
+
     string userInput;
-    cout << "myShell$:";
+    //cout << *c <<" myShell$:";
     cin >> userInput;
 
     if(userInput == "clr"){
