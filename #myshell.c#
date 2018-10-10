@@ -1,7 +1,6 @@
-#include <stdio.h>
+ad#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 
 const int bufferSize = 1024;
 int loop = 0;
@@ -22,27 +21,6 @@ char* readLine(){
   return input;
 }
 
-char** parse(char* input){
-  char* space = " ";
-  char *arg = strtok(input,space);
-  char** argsArray = malloc(sizeof(char)*bufferSize);
-  int i = 0;
-
-  while(arg != NULL){
-    argsArray[i] = arg;
-    i++;
-    arg = strtok(NULL, space);
-  }
-  argsArray[i] = NULL;
-  return argsArray;
-}
-
-int quit(){
-  return -1;
-}
-
-
-
 //This is the main function
 int main(int argc, char *argv[]){
   system("clear");
@@ -50,7 +28,8 @@ int main(int argc, char *argv[]){
   while (loop != -1) {
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
-    printf("%s>>mySHELL$ ", cwd);
+    printf("%s>>mySHELL$", cwd);
     char* userInput = readLine();
+    printf("%s", userInput);
   }
 }
