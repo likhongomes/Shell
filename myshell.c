@@ -37,11 +37,38 @@ char** parse(char* input){
   return argsArray;
 }
 
-int quit(){
-  return -1;
+void quit(){
+  loop = -1;
+}
+
+void cd(){
+
+}
+
+void clr(){
+
+}
+
+void dir(){
+
+}
+
+void environ(){
+
+}
+
+void echo(){
+
+}
+
+void help(){
+
 }
 
 
+void execute(char **args){
+
+}
 
 //This is the main function
 int main(int argc, char *argv[]){
@@ -52,5 +79,10 @@ int main(int argc, char *argv[]){
     getcwd(cwd, sizeof(cwd));
     printf("%s>>mySHELL$ ", cwd);
     char* userInput = readLine();
+    char** inputArray = parse(userInput);
+    printf("%s",inputArray[0]);
+    if(strcmp(inputArray[0],"exit")){
+      quit();
+    }
   }
 }
