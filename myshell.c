@@ -67,11 +67,18 @@ void help(){
 
 
 void execute(char **args){
-  if(strcmp(inputArray[0],"exit")==0){
+
+  if(args[0] == NULL){
+    //checking if the args list is empty
+  }else{
+    if(strcmp(args[0],"exit")==0){
       quit();
-    } else if (strcmp(inputArray[0],"clear")==0){
+    } else if (strcmp(args[0],"clear")==0){
       clr();
     }
+  }
+
+  
 }
 
 //This is the main function
@@ -85,6 +92,6 @@ int main(int argc, char *argv[]){
     char* userInput = readLine();
     char** inputArray = parse(userInput);
     //printf("%s",inputArray[0]);
-    execute(inputUser);
+    execute(inputArray);
   }
 }
