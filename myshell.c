@@ -46,7 +46,7 @@ void cd(){
 }
 
 void clr(){
-
+  system("clear");
 }
 
 void dir(){
@@ -67,7 +67,11 @@ void help(){
 
 
 void execute(char **args){
-
+  if(strcmp(inputArray[0],"exit")==0){
+      quit();
+    } else if (strcmp(inputArray[0],"clear")==0){
+      clr();
+    }
 }
 
 //This is the main function
@@ -80,9 +84,7 @@ int main(int argc, char *argv[]){
     printf("%s>>mySHELL$ ", cwd);
     char* userInput = readLine();
     char** inputArray = parse(userInput);
-    printf("%s",inputArray[0]);
-    if(strcmp(inputArray[0],"exit")){
-      quit();
-    }
+    //printf("%s",inputArray[0]);
+    execute(inputUser);
   }
 }
