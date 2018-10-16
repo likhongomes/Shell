@@ -3,6 +3,13 @@
 #include <unistd.h>
 #include <string.h>
 
+/*
+Likhon D. Gomes
+CIS 3207
+Lab 2 - Shell
+*/
+
+
 const int bufferSize = 1024;
 int loop = 0;
 
