@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 /*
 Likhon D. Gomes
@@ -48,16 +50,33 @@ void quit(){
   loop = -1;
 }
 
-void cd(){
-
+void cd(char** args){
+  if(chdir(args[1])!=0){
+    printf("directory not found");
+  }
 }
 
 void clr(){
   printf("\033[H\033[2J]");
 }
 
-void dir(){
+void dir(char** args){
+  DIR *dir;
+  struct dirent *contents;
+  if(args[1] == NULL){
+    dir = opendir("./");
+  } else {
+    //check if the directory exists.
+    if((dir = opendir(args[1]))==NULL){
+      printf("No such directory.\n");
+    }
+  }
 
+  while((contents = readdir(dir)) != NULL){
+    printf("%s ", contents->d_name);
+  }
+  printf("\n");
+  closedir(dir);
 }
 
 void environ(){
@@ -87,37 +106,58 @@ void execute(char **args){
     //checking if the args list is empty
   }else{
 
-    if(strcmp(args[0],"exit")==0){
-      quit();
-    } else if (strcmp(args[0],"clear")==0){
-      clr();
-    } else if (strcmp(args[0],"echo")==0){
-      echo(args);
-    }else if (strcmp(args[0],"cd")==0){
-      cd();
-    } else if (strcmp(args[0],"dir")==0){
-      dir();
-    } else if (strcmp(args[0],"environ")==0){
-      environ();
-    } else if (strcmp(args[0],"help")==0){
-      help();
-    } else {
-      //not a builtin function
-      pid_t pid = fork();
-      if(pid < 0){
-        printf("fork failed");
-      } else if ( pid == 0){
-        execvp(args[0], args);
-      } else {
-        if(runBG == 0){
-          waitpid(pid, NULL,0);
-        }
-      }
+    int i = 0;
+    while(args[i]!=NULL){
+    
+      //testing out the special symbols
+    if(strcmp(args[0],">")==0){
 
+    }
+    if(strcmp(args[0],"<")==0){
+
+    }
+    if(strcmp(args[0],"&")==0){
+
+    }
+    if(strcmp(args[0],">>")==0){
+
+    }
+    if(strcmp(args[0],"|")==0){
 
     }
 
 
+    //checking for internal functions
+      if(strcmp(args[0],"exit")==0){
+        quit();
+      } else if (strcmp(args[0],"clear")==0){
+        clr();
+      } else if (strcmp(args[0],"echo")==0){
+        echo(args);
+      }else if (strcmp(args[0],"cd")==0){
+        cd(args);
+      } else if (strcmp(args[0],"dir")==0){
+        dir(args);
+      } else if (strcmp(args[0],"environ")==0){
+        environ();
+      } else if (strcmp(args[0],"help")==0){
+        help();
+      } else {
+      //not a builtin function
+      pid_t pid = fork();
+        if(pid < 0){
+          printf("fork failed");
+        } else if ( pid == 0){
+          execvp(args[0], args);
+          printf("command or executable file not recognized\n");
+        } else {
+          if(runBG == 0){
+            waitpid(pid, NULL,0);
+          }
+      }
+      }
+      i++;
+    }
     }
   }
 
