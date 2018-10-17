@@ -15,12 +15,14 @@ CIS 3207
 Lab 2 - Shell
 */
 
+//this is where all the execution happens
 void execute(char **args);
 int makePipe(char** args1, char** args2);
 
 const int bufferSize = 1024;
 int loop = 0;
 
+//this is the readline functoin
 char* readLine(){
   char *input = malloc(sizeof(char)*bufferSize);
   char c;
@@ -37,12 +39,14 @@ char* readLine(){
   return input;
 }
 
+//this is the parse function
 char** parse(char* input){
   char* space = " ";
   char *arg = strtok(input,space);
   char** argsArray = malloc(sizeof(char)*bufferSize);
   int i = 0;
 
+  //looping through all the words in the command.
   while(arg != NULL){
     argsArray[i] = arg;
     i++;
@@ -52,20 +56,24 @@ char** parse(char* input){
   return argsArray;
 }
 
+//a simple quit function that sets the loop variable to -1
 void quit(){
   loop = -1;
 }
 
+//This is the cd function
 void cd(char** args){
   if(chdir(args[1])!=0){
     printf("directory not found");
   }
 }
 
+//function for clearing screen without invoking any system call
 void clr(){
   printf("\033[H\033[2J]");
 }
 
+//This is the dir function.
 void dir(char** args){
   DIR *dir;
   struct dirent *contents;
@@ -77,7 +85,7 @@ void dir(char** args){
       printf("No such directory.\n");
     }
   }
-
+  // printing out all the files from the directory.
   while((contents = readdir(dir)) != NULL){
     printf("%s ", contents->d_name);
   }
@@ -85,11 +93,13 @@ void dir(char** args){
   closedir(dir);
 }
 
+//Function to show environment
 void environ(){
   int numOfVars = 7;
   char* info[] = {"USER","HOME","PATH","SHELL","OSTYPE","PWD","GROUP"};
 
   int i;
+  //getting those environment variables
   for(i = 0; i < numOfVars; i++){
     const char* var = getenv(info[i]);
     if(var != NULL){
@@ -100,6 +110,7 @@ void environ(){
   }
 }
 
+//function for echo
 void echo(char** args){
   int i = 1;
   while(args[i] != NULL){
@@ -110,6 +121,7 @@ void echo(char** args){
   printf("\n");
 }
 
+//function to print out help
 void help(char** args) {
   //open readme
   FILE* fp = fopen("readme", "r");
@@ -239,6 +251,7 @@ void execute(char **args){
     //checking if the args list is empty
   }else{
 
+//checks through all the symbols possible
     i = 0;
   while(args[i] != NULL) {
    if(strcmp(args[i], "&") == 0) {
