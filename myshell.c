@@ -4,6 +4,9 @@
 #include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/ioctl.h>
+
+#include <signal.h>
 
 /*
 Likhon D. Gomes
@@ -80,7 +83,18 @@ void dir(char** args){
 }
 
 void environ(){
+  int numOfVars = 7;
+  char* info[] = {"USER","HOME","PATH","SHELL","OSTYPE","PWD","GROUP"};
 
+  int i;
+  for(i = 0; i < numOfVars; i++){
+    const char* var = getenv(info[i]);
+    if(var != NULL){
+      printf("%s: %s\n",info[i], var);
+    } else {
+      printf("Error: Could not fetch the environment variables.");
+    }
+  }
 }
 
 void echo(char** args){
@@ -93,8 +107,73 @@ void echo(char** args){
   printf("\n");
 }
 
-void help(){
+void help(char** args) {
+  //open readme
+  FILE* fp = fopen("readme", "r");
+  if(fp == NULL) {
+    printf("Can't find readme file.\n");
+  }
+  //get length of readme file so array can be large enough to hold it
+  fseek(fp, 0, SEEK_END);
+  int len = ftell(fp);
+  fseek(fp, 0, SEEK_SET);
+  char text[len];
 
+  //if current stdout is the terminal, print some of readme file and then wait for user to hit enter to show more
+  if(isatty(1)) {  
+    //get height of window so we know how many lines to print at a time
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    int rows = w.ws_row - 1;  
+    
+    int r = 1;
+    //print first screen of readme file
+    int lastpos = 0;
+    int curpos;
+    fgets(text, len, fp);
+    do {
+      printf("%s", text);
+      //if line is longer than window is wide, we need to increment r again
+      curpos = ftell(fp);
+      int len = curpos - lastpos;
+      while(len > w.ws_col) {
+        r++;
+        len -= w.ws_col;
+      }
+      r++;
+      lastpos = curpos;
+    }
+    while(fgets(text, len, fp) != NULL && r < rows);
+    //if we haven't reached EOF yet, wait for user to hit enter
+   
+    printf("%s", text);
+    //now wait for user to hit enter to print next line or q to quit
+    char* input;
+    while(1) {
+      input = readLine();
+      if(strcmp(input, "q") == 0) {
+      }
+      else {
+        if(fgets(text, len, fp) == NULL) {
+          break;
+        }
+        else {
+          //get rid of trailing newline from when user hit enter, then print line
+          strtok(text, "\n");
+          printf("%s", text);
+        }
+      }
+    }
+    printf("Reached end of help file. Press enter to return to the shell.\n");
+    //wait for any key press & enter to exit the function
+    getchar();
+  }
+  //STDOUT isn't the terminal, so just print the whole help file and don't wait for any user input
+  else {
+    while(fgets(text, len, fp) != NULL ) {
+      printf("%s", text);
+    }
+  }
 }
 
 
@@ -141,7 +220,7 @@ void execute(char **args){
       } else if (strcmp(args[0],"environ")==0){
         environ();
       } else if (strcmp(args[0],"help")==0){
-        help();
+        help(args);
       } else {
       //not a builtin function
       pid_t pid = fork();
