@@ -5,8 +5,9 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/ioctl.h>
-
+#include <fcntl.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 /*
 Likhon D. Gomes
@@ -14,6 +15,8 @@ CIS 3207
 Lab 2 - Shell
 */
 
+void execute(char **args);
+int makePipe(char** args1, char** args2);
 
 const int bufferSize = 1024;
 int loop = 0;
@@ -176,51 +179,187 @@ void help(char** args) {
   }
 }
 
+int makePipe(char** args1, char** args2) {
+  pid_t pid1, pid2;
+  int fd[2];
+  //create pipe
+  pipe(fd);
+
+  //fork to exec first program
+  pid1 = fork();
+  if(pid1 < 0) {
+    printf("Error forking.\n");
+  }
+  else if(pid1 == 0) {
+    //send stdout to write end of pipe
+    dup2(fd[1], STDOUT_FILENO);
+    //close read end of pipe
+    close(fd[0]);
+    execute(args1);
+    exit(0);
+  }
+  else {
+    //returned to parent process
+    //fork to exe second program
+    pid2 = fork();
+    if(pid2 < 0) {
+      printf("Error forking.\n");
+    }
+    else if(pid2 == 0) {
+      //send stdin to read end of pipe
+      dup2(fd[0], STDIN_FILENO);
+      //close write end of pipe
+      close(fd[1]);
+      execute(args2);
+      exit(0);
+    }
+    else {
+      //we are in parent, wait for both child processes to finish 
+      //close the pipe in parent process
+      close(fd[0]);
+      close(fd[1]);
+      //wait for both children to finish
+      waitpid(pid1, NULL, 0);
+      waitpid(pid2, NULL, 0);
+    }
+  }
+  return 1;
+}
 
 void execute(char **args){
 
-  int runBG = 0; // running in the background
+  int runBg = 0; // running in the background
+  int builtIn = 0;
+  int redirectIn = 0;
+  int redirectOut = 0;
+  int i, j;
+  int stdinDup, stdoutDup, infile, outfile;
 
   if(args[0] == NULL){
     //checking if the args list is empty
   }else{
 
-    int i = 0;
-    while(args[i]!=NULL){
-    
-      //testing out the special symbols
-    if(strcmp(args[0],">")==0){
+    i = 0;
+  while(args[i] != NULL) {
+   if(strcmp(args[i], "&") == 0) {
+      runBg = 1;
+    } 
+   else if(strcmp(args[i], "<") == 0) {
+      infile = open(args[i+1], O_RDONLY);
+      args[i] = NULL;
+      redirectIn = 1;
+    }
+    else if(strcmp(args[i], ">") == 0) {
+      outfile = open(args[i+1], O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR | O_CLOEXEC);
+      args[i] = NULL;
+      redirectOut = 1;
+    } 
+    else if(strcmp(args[i], ">>") == 0) {
+      outfile = open(args[i+1], O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR | O_CLOEXEC);
+      args[i] = NULL;
+      redirectOut = 1;
+    }
+    else if(strcmp(args[i], "|") == 0) {
+      //set | argument to null, then call makePipe passing args before pipe and args after pipe
+      makePipe(&args[0],&args[i+i]);
+      args[i] = NULL;
 
     }
-    if(strcmp(args[0],"<")==0){
-
-    }
-    if(strcmp(args[0],"&")==0){
-
-    }
-    if(strcmp(args[0],">>")==0){
-
-    }
-    if(strcmp(args[0],"|")==0){
-
-    }
-
+    i++;
+  }
 
     //checking for internal functions
       if(strcmp(args[0],"exit")==0){
+        //save current i/o values so they can be restored later
+        stdinDup = dup(STDIN_FILENO);
+        stdoutDup = dup(STDOUT_FILENO);
+        if(redirectIn == 1) {
+        dup2(infile, STDIN_FILENO);
+        }
+        if(redirectOut == 1) {
+         dup2(outfile, STDOUT_FILENO);
+        }
         quit();
+        dup2(stdoutDup, STDOUT_FILENO);
+        dup2(stdinDup, STDIN_FILENO);
       } else if (strcmp(args[0],"clear")==0){
+        //save current i/o values so they can be restored later
+        stdinDup = dup(STDIN_FILENO);
+        stdoutDup = dup(STDOUT_FILENO);
+        if(redirectIn == 1) {
+        dup2(infile, STDIN_FILENO);
+        }
+        if(redirectOut == 1) {
+          dup2(outfile, STDOUT_FILENO);
+        }
         clr();
+        dup2(stdoutDup, STDOUT_FILENO);
+        dup2(stdinDup, STDIN_FILENO);
       } else if (strcmp(args[0],"echo")==0){
+        //save current i/o values so they can be restored later
+        stdinDup = dup(STDIN_FILENO);
+        stdoutDup = dup(STDOUT_FILENO);
+        if(redirectIn == 1) {
+          dup2(infile, STDIN_FILENO);
+        }
+        if(redirectOut == 1) {
+          dup2(outfile, STDOUT_FILENO);
+        }
         echo(args);
+        dup2(stdoutDup, STDOUT_FILENO);
+        dup2(stdinDup, STDIN_FILENO);
       }else if (strcmp(args[0],"cd")==0){
+        //save current i/o values so they can be restored later
+        stdinDup = dup(STDIN_FILENO);
+        stdoutDup = dup(STDOUT_FILENO);
+        if(redirectIn == 1) {
+          dup2(infile, STDIN_FILENO);
+        }
+        if(redirectOut == 1) {
+          dup2(outfile, STDOUT_FILENO);
+        }
         cd(args);
+        dup2(stdoutDup, STDOUT_FILENO);
+        dup2(stdinDup, STDIN_FILENO);
       } else if (strcmp(args[0],"dir")==0){
+        //save current i/o values so they can be restored later
+        stdinDup = dup(STDIN_FILENO);
+        stdoutDup = dup(STDOUT_FILENO);
+        if(redirectIn == 1) {
+          dup2(infile, STDIN_FILENO);
+        }
+        if(redirectOut == 1) {
+          dup2(outfile, STDOUT_FILENO);
+        }
         dir(args);
+        dup2(stdoutDup, STDOUT_FILENO);
+        dup2(stdinDup, STDIN_FILENO);
       } else if (strcmp(args[0],"environ")==0){
+        //save current i/o values so they can be restored later
+        stdinDup = dup(STDIN_FILENO);
+        stdoutDup = dup(STDOUT_FILENO);
+        if(redirectIn == 1) {
+          dup2(infile, STDIN_FILENO);
+        }
+        if(redirectOut == 1) {
+          dup2(outfile, STDOUT_FILENO);
+        }
         environ();
+        dup2(stdoutDup, STDOUT_FILENO);
+        dup2(stdinDup, STDIN_FILENO);
       } else if (strcmp(args[0],"help")==0){
+        //save current i/o values so they can be restored later
+        stdinDup = dup(STDIN_FILENO);
+        stdoutDup = dup(STDOUT_FILENO);
+        if(redirectIn == 1) {
+          dup2(infile, STDIN_FILENO);
+        }
+        if(redirectOut == 1) {
+          dup2(outfile, STDOUT_FILENO);
+        }
         help(args);
+        dup2(stdoutDup, STDOUT_FILENO);
+        dup2(stdinDup, STDIN_FILENO);
       } else {
       //not a builtin function
       pid_t pid = fork();
@@ -230,13 +369,11 @@ void execute(char **args){
           execvp(args[0], args);
           printf("command or executable file not recognized\n");
         } else {
-          if(runBG == 0){
+          if(runBg == 0){
             waitpid(pid, NULL,0);
           }
       }
       }
-      i++;
-    }
     }
   }
 
