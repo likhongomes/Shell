@@ -7,7 +7,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/wait.h>
+#include <sys/wait.h>g
 
 /*
 Likhon D. Gomes
@@ -399,7 +399,7 @@ int main(int argc, char *argv[]){
   while (loop != -1) {
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
-    printf("%s>>mySHELL$ ", cwd);
+    printf("%s::Leo's Shell:  ", cwd);
     char* userInput = readLine();
     char** inputArray = parse(userInput);
     //printf("%s",inputArray[0]);
