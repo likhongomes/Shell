@@ -7,7 +7,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/wait.h>g
+#include <sys/wait.h>
 
 /*
 Likhon D. Gomes
@@ -238,6 +238,19 @@ int makePipe(char** args1, char** args2) {
   return 1;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 void execute(char **args){
 
   int runBg = 0; // running in the background
@@ -406,3 +419,4 @@ int main(int argc, char *argv[]){
     execute(inputArray);
   }
 }
+*/
