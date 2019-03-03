@@ -250,7 +250,7 @@ int makePipe(char** args1, char** args2) {
 
 
 
-/*
+
 void execute(char **args){
 
   int runBg = 0; // running in the background
@@ -294,6 +294,22 @@ void execute(char **args){
     i++;
   }
 
+    /*
+    pid_t pid;
+    if((pid = fork())==0){
+        printf("in child");
+        execvp(args[i], args);
+    } else if(pid > 0){
+        printf("In parent \n");
+        int status = 0;
+        waitpid(pid, &status, 0);
+        printf("%d", (int)pid);
+    } else {
+        printf("Process failed \n");
+    }*/
+
+
+    
     //checking for internal functions
       if(strcmp(args[0],"exit")==0){
         //save current i/o values so they can be restored later
@@ -387,8 +403,36 @@ void execute(char **args){
         dup2(stdoutDup, STDOUT_FILENO);
         dup2(stdinDup, STDIN_FILENO);
       } else {
+
+
+
+
+
       //not a builtin function
       pid_t pid = fork();
+
+        if(pid == 0){
+          //printf("in child");
+          execvp(args[0],args);       
+          fprintf(stderr, "RSI: %s: command not found\n",args[0]); /*If execvp failes*/
+          exit(1);
+        } else if(pid>0){
+          //printf("in parent");
+          if(runBg==0){
+            waitpid(pid,NULL,0);
+          } else {
+            printf("Background process %d",(int)pid);
+          }
+          
+          
+
+
+        } else {
+          printf("fork failed");
+        }
+
+
+        /*
         if(pid < 0){
           printf("fork failed");
         } else if ( pid == 0){
@@ -398,7 +442,7 @@ void execute(char **args){
           if(runBg == 0){
             waitpid(pid, NULL,0);
           }
-      }
+      }*/
       }
     }
   }
@@ -419,4 +463,3 @@ int main(int argc, char *argv[]){
     execute(inputArray);
   }
 }
-*/
