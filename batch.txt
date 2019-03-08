@@ -1,0 +1,4 @@
+dir
+mkdir ThisCameFromBatFile
+wc myshell.c
+emacs a.c

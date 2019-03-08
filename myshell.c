@@ -414,7 +414,7 @@ void execute(char **args){
         if(pid == 0){
           //printf("in child");
           execvp(args[0],args);       
-          fprintf(stderr, "RSI: %s: command not found\n",args[0]); /*If execvp failes*/
+          fprintf(stderr, "myshell>: %s: command not found\n",args[0]); /*If execvp failes*/
           exit(1);
         } else if(pid>0){
           //printf("in parent");
@@ -447,19 +447,51 @@ void execute(char **args){
     }
   }
 
-  
-
-//This is the main function
-int main(int argc, char *argv[]){
+void singleCommandMode(){
   printf("\033[H\033[2J]");
-
   while (loop != -1) {
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
-    printf("%s::Leo's Shell:  ", cwd);
+    printf("%s/myshell>", cwd);
     char* userInput = readLine();
     char** inputArray = parse(userInput);
     //printf("%s",inputArray[0]);
     execute(inputArray);
   }
+}
+
+void batchExecution(char filename[100]){
+  printf("Executing Batch File\n");
+
+  FILE *file;
+  char line[200];
+  char **args;
+  file = fopen(filename, "r");
+  if (file == NULL) {
+    printf("Unable to open file");
+  } else {
+    while(fgets(line, sizeof(line), file)!= NULL){
+      printf("\n%s",line);
+      args=parse(line);
+      execute(args);
+      ///////////
+    }
+  }
+  free(args);
+  fclose(file);
+}
+
+//This is the main function
+int main(int argc, char *argv[]){
+
+  if(argc == 1){ //single command execution
+    singleCommandMode();
+  } else if (argc == 2){ //batch file execution
+    batchExecution(argv[1]);
+  } else {
+    printf("Invalid Number of Arguments\n");
+  }
+
+
+  
 }
