@@ -201,8 +201,7 @@ int makePipe(char** args1, char** args2) {
   pid1 = fork();
   if(pid1 < 0) {
     printf("Error forking.\n");
-  }
-  else if(pid1 == 0) {
+  } else if(pid1 == 0) {
     //send stdout to write end of pipe
     dup2(fd[1], STDOUT_FILENO);
     //close read end of pipe
@@ -236,6 +235,34 @@ int makePipe(char** args1, char** args2) {
     }
   }
   return 1;
+}
+
+
+void doPipe(char** args1, char** args2){
+  pid_t pid;
+
+  int pipeFd[2]; //array to collect the file descriptors
+  pipe(pipeFd); // creating the pipe.
+
+  pid = fork();
+
+  if(pid == 0){
+    //fork is in child
+    dup2(pipeFd[1], STDOUT_FILENO);
+    close(pipeFd[0]);
+    execute(args1);
+    exit(0);
+  } else if(pid > 0){
+    //fork is in parent
+    dup2(pipeFd[0],STDIN_FILENO); //
+    close(pipeFd[1]); // closing the STIN end of the pipe
+    execute(args2);
+    printf("fork completed");
+    //waitpid(pid,NULL,0);
+    //exit(0);
+  } else {
+    //fork failed
+  }
 }
 
 
@@ -287,7 +314,7 @@ void execute(char **args){
     }
     else if(strcmp(args[i], "|") == 0) {
       //set | argument to null, then call makePipe passing args before pipe and args after pipe
-      makePipe(&args[0],&args[i+i]);
+      doPipe(&args[0],&args[i+i]);
       args[i] = NULL;
 
     }
@@ -490,8 +517,5 @@ int main(int argc, char *argv[]){
     batchExecution(argv[1]);
   } else {
     printf("Invalid Number of Arguments\n");
-  }
-
-
-  
+  }  
 }
