@@ -237,7 +237,7 @@ int makePipe(char** args1, char** args2) {
   return 1;
 }
 
-
+/*
 void doPipe(char** args1, char** args2){
   pid_t pid;
 
@@ -264,7 +264,7 @@ void doPipe(char** args1, char** args2){
     //fork failed
   }
 }
-
+*/
 
 
 
@@ -314,7 +314,7 @@ void execute(char **args){
     }
     else if(strcmp(args[i], "|") == 0) {
       //set | argument to null, then call makePipe passing args before pipe and args after pipe
-      doPipe(&args[0],&args[i+i]);
+      makePipe(&args[0],&args[i+i]);
       args[i] = NULL;
 
     }
@@ -444,10 +444,13 @@ void execute(char **args){
           fprintf(stderr, "myshell>: %s: command not found\n",args[0]); /*If execvp failes*/
           exit(1);
         } else if(pid>0){
+          if(runBg == 1)
+            dup2(4,STDOUT_FILENO);
           //printf("in parent");
           if(runBg==0){
             waitpid(pid,NULL,0);
           } else {
+            
             printf("Background process %d",(int)pid);
           }
           
