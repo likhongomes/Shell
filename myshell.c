@@ -237,7 +237,7 @@ int makePipe(char** args1, char** args2) {
   return 1;
 }
 
-/*
+
 void doPipe(char** args1, char** args2){
   pid_t pid;
 
@@ -248,13 +248,13 @@ void doPipe(char** args1, char** args2){
 
   if(pid == 0){
     //fork is in child
-    dup2(pipeFd[1], STDOUT_FILENO);
+    dup2(pipeFd[0], STDOUT_FILENO);
     close(pipeFd[0]);
     execute(args1);
     exit(0);
   } else if(pid > 0){
     //fork is in parent
-    dup2(pipeFd[0],STDIN_FILENO); //
+    dup2(pipeFd[1],STDIN_FILENO); //
     close(pipeFd[1]); // closing the STIN end of the pipe
     execute(args2);
     printf("fork completed");
@@ -264,7 +264,7 @@ void doPipe(char** args1, char** args2){
     //fork failed
   }
 }
-*/
+
 
 
 
@@ -444,19 +444,12 @@ void execute(char **args){
           fprintf(stderr, "myshell>: %s: command not found\n",args[0]); /*If execvp failes*/
           exit(1);
         } else if(pid>0){
-          if(runBg == 1)
-            dup2(4,STDOUT_FILENO);
           //printf("in parent");
           if(runBg==0){
             waitpid(pid,NULL,0);
           } else {
-            
             printf("Background process %d",(int)pid);
           }
-          
-          
-
-
         } else {
           printf("fork failed");
         }
