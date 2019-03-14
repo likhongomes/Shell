@@ -272,8 +272,7 @@ void halt(){
     char input = getchar();
     if(input == '\n')
       break;
-  }
-  
+  }  
 }
 
 
