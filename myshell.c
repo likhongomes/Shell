@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -310,12 +311,12 @@ void execute(char **args){
       redirectIn = 1;
     }
     else if(strcmp(args[i], ">") == 0) {
-      outfile = open(args[i+1], O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR | O_CLOEXEC);
+      outfile = open(args[i+1], O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR );
       args[i] = NULL;
       redirectOut = 1;
     } 
     else if(strcmp(args[i], ">>") == 0) {
-      outfile = open(args[i+1], O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR | O_CLOEXEC);
+      outfile = open(args[i+1], O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR );
       args[i] = NULL;
       redirectOut = 1;
     }
