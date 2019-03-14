@@ -265,8 +265,16 @@ void doPipe(char** args1, char** args2){
   }
 }
 
-
-
+//This is the pause function
+void halt(){
+  char input = ' ';
+  while(1){
+    char input = getchar();
+    if(input == '\n')
+      break;
+  }
+  
+}
 
 
 
@@ -429,6 +437,8 @@ void execute(char **args){
         help(args);
         dup2(stdoutDup, STDOUT_FILENO);
         dup2(stdinDup, STDIN_FILENO);
+      } else if (strcmp(args[0],"pause")==0){
+        halt();
       } else {
 
 
@@ -503,6 +513,8 @@ void batchExecution(char filename[100]){
   free(args);
   fclose(file);
 }
+
+
 
 //This is the main function
 int main(int argc, char *argv[]){
