@@ -17,8 +17,21 @@ Lab 2 - Shell
 */
 
 //this is where all the execution happens
-void execute(char **args);
+char* readLine();
+char** parse(char* input);
+void quit();
+void cd(char** args);
+void clr();
+void dir(char** args);
+void environ();
+void echo(char** args);
+void help(char** args);
 int makePipe(char** args1, char** args2);
+void halt();
+void execute(char **args);
+void singleCommandMode();
+void batchExecution(char filename[100]);
+
 
 const int bufferSize = 1024;
 int loop = 0;
@@ -168,6 +181,7 @@ void help(char** args) {
     while(1) {
       input = readLine();
       if(strcmp(input, "q") == 0) {
+        break;
       }
       else {
         if(fgets(text, len, fp) == NULL) {
@@ -239,32 +253,46 @@ int makePipe(char** args1, char** args2) {
 }
 
 
+
+
+
+
+
+/*
 void doPipe(char** args1, char** args2){
-  pid_t pid;
+  int pipefd[2];
+  int pid;
 
-  int pipeFd[2]; //array to collect the file descriptors
-  pipe(pipeFd); // creating the pipe.
+  char *cat_args[] = {"cat", "scores", NULL};
+  char *grep_args[] = {"grep", "Villanova", NULL};
 
+  // make a pipe (fds go in pipefd[0] and pipefd[1])
+
+  pipe(pipefd);
   pid = fork();
+  if (pid == 0)
+    {
+      // child gets here and handles "grep Villanova"
+      // replace standard input with input part of pipe
+      dup2(pipefd[0], 0);
+      // close unused hald of pipe
+      close(pipefd[1]);
+      // execute grep
+      execute(args1);
+    } else {
+      // parent gets here and handles "cat scores"
+      // replace standard output with output part of pipe
+      dup2(pipefd[1], 1);
+      // close unused unput half of pipe
+      close(pipefd[0]);
+      // execute cat
+      execute(args2);
+    }
+}*/
 
-  if(pid == 0){
-    //fork is in child
-    dup2(pipeFd[0], STDOUT_FILENO);
-    close(pipeFd[0]);
-    execute(args1);
-    exit(0);
-  } else if(pid > 0){
-    //fork is in parent
-    dup2(pipeFd[1],STDIN_FILENO); //
-    close(pipeFd[1]); // closing the STIN end of the pipe
-    execute(args2);
-    printf("fork completed");
-    //waitpid(pid,NULL,0);
-    //exit(0);
-  } else {
-    //fork failed
-  }
-}
+
+
+
 
 //This is the pause function
 void halt(){
@@ -321,6 +349,7 @@ void execute(char **args){
       redirectOut = 1;
     }
     else if(strcmp(args[i], "|") == 0) {
+      printf("sdfasdfadsfadfa");
       //set | argument to null, then call makePipe passing args before pipe and args after pipe
       makePipe(&args[0],&args[i+i]);
       args[i] = NULL;
