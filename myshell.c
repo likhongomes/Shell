@@ -1,74 +1,18 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/wait.h>
-
-/*
-Likhon D. Gomes
-CIS 3207
-Lab 2 - Shell
-*/
-
-//this is where all the execution happens
-char* readLine();
-char** parse(char* input);
-void quit();
-void cd(char** args);
-void clr();
-void dir(char** args);
-void environ();
-void echo(char** args);
-void help(char** args);
-int makePipe(char** args1, char** args2);
-void halt();
-void execute(char **args);
-void singleCommandMode();
-void batchExecution(char filename[100]);
+#include "utilities.h"
 
 
-const int bufferSize = 1024;
-int loop = 0;
+//This is the main function
+int main(int argc, char *argv[]){
 
-//this is the readline functoin
-char* readLine(){
-  char *input = malloc(sizeof(char)*bufferSize);
-  char c;
-  int pos = 0;
-  while((c= getchar()) != '\n' && c != EOF){
-    input[pos] = c;
-    pos ++;
-    if(pos >= bufferSize - 1) {
-  		printf("User input too long. Please input args less than 1024 characters.\n");
-  		break;
-  	}
-  }
-  input[pos] = '\0';
-  return input;
+  if(argc == 1){ //single command execution
+    singleCommandMode();
+  } else if (argc == 2){ //batch file execution
+    batchExecution(argv[1]);
+  } else {
+    printf("Invalid Number of Arguments\n");
+  }  
 }
 
-//this is the parse function
-char** parse(char* input){
-  char* space = " ";
-  char *arg = strtok(input,space);
-  char** argsArray = malloc(sizeof(char)*bufferSize);
-  int i = 0;
-
-  //looping through all the words in the command.
-  while(arg != NULL){
-    argsArray[i] = arg;
-    i++;
-    arg = strtok(NULL, space);
-  }
-  argsArray[i] = NULL;
-  return argsArray;
-}
 
 //a simple quit function that sets the loop variable to -1
 void quit(){
@@ -253,47 +197,6 @@ int makePipe(char** args1, char** args2) {
 }
 
 
-
-
-
-
-
-/*
-void doPipe(char** args1, char** args2){
-  int pipefd[2];
-  int pid;
-
-  char *cat_args[] = {"cat", "scores", NULL};
-  char *grep_args[] = {"grep", "Villanova", NULL};
-
-  // make a pipe (fds go in pipefd[0] and pipefd[1])
-
-  pipe(pipefd);
-  pid = fork();
-  if (pid == 0)
-    {
-      // child gets here and handles "grep Villanova"
-      // replace standard input with input part of pipe
-      dup2(pipefd[0], 0);
-      // close unused hald of pipe
-      close(pipefd[1]);
-      // execute grep
-      execute(args1);
-    } else {
-      // parent gets here and handles "cat scores"
-      // replace standard output with output part of pipe
-      dup2(pipefd[1], 1);
-      // close unused unput half of pipe
-      close(pipefd[0]);
-      // execute cat
-      execute(args2);
-    }
-}*/
-
-
-
-
-
 //This is the pause function
 void halt(){
   char input = ' ';
@@ -303,15 +206,6 @@ void halt(){
       break;
   }  
 }
-
-
-
-
-
-
-
-
-
 
 
 void execute(char **args){
@@ -357,21 +251,6 @@ void execute(char **args){
     }
     i++;
   }
-
-    /*
-    pid_t pid;
-    if((pid = fork())==0){
-        printf("in child");
-        execvp(args[i], args);
-    } else if(pid > 0){
-        printf("In parent \n");
-        int status = 0;
-        waitpid(pid, &status, 0);
-        printf("%d", (int)pid);
-    } else {
-        printf("Process failed \n");
-    }*/
-
 
     
     //checking for internal functions
@@ -493,18 +372,6 @@ void execute(char **args){
           printf("fork failed");
         }
 
-
-        /*
-        if(pid < 0){
-          printf("fork failed");
-        } else if ( pid == 0){
-          execvp(args[0], args);
-          printf("command or executable file not recognized\n");
-        } else {
-          if(runBg == 0){
-            waitpid(pid, NULL,0);
-          }
-      }*/
       }
     }
   }
@@ -545,14 +412,3 @@ void batchExecution(char filename[100]){
 
 
 
-//This is the main function
-int main(int argc, char *argv[]){
-
-  if(argc == 1){ //single command execution
-    singleCommandMode();
-  } else if (argc == 2){ //batch file execution
-    batchExecution(argv[1]);
-  } else {
-    printf("Invalid Number of Arguments\n");
-  }  
-}
