@@ -1,4 +1,4 @@
-dir
+clear
+emacs a.c
 mkdir ThisCameFromBatFile
 wc myshell.c
-emacs a.c
