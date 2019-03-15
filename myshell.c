@@ -88,7 +88,7 @@ void dir(char** args){
   }
   // printing out all the files from the directory.
   while((contents = readdir(dir)) != NULL){
-    printf("%s ", contents->d_name);
+    printf("%s \n", contents->d_name);
   }
   printf("\n");
   closedir(dir);
@@ -346,7 +346,7 @@ void execute(char **args){
 
     
     //checking for internal functions
-      if(strcmp(args[0],"exit")==0){
+      if(strcmp(args[0],"exit")==0 || strcmp(args[0],"quit")==0){
         //save current i/o values so they can be restored later
         stdinDup = dup(STDIN_FILENO);
         stdoutDup = dup(STDOUT_FILENO);
@@ -359,7 +359,7 @@ void execute(char **args){
         quit();
         dup2(stdoutDup, STDOUT_FILENO);
         dup2(stdinDup, STDIN_FILENO);
-      } else if (strcmp(args[0],"clear")==0){
+      } else if (strcmp(args[0],"clear")==0 || strcmp(args[0],"clr")==0){
         //save current i/o values so they can be restored later
         stdinDup = dup(STDIN_FILENO);
         stdoutDup = dup(STDOUT_FILENO);
