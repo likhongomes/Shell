@@ -12,7 +12,7 @@
  1.Builtin Commands
     cd [directory]
        Change current working directory to a specified one.
-    clear
+    clear or clr
        Clears the screen.
     dir [directory]
        Prints the list of files in the current directory or in the specified directory.
@@ -22,7 +22,7 @@
        Prints [comment] to the screen.
     help
        Prints the contents of this manual.
-    quit 
+    quit or exit
        Exits this shell.
 ----------------------------------
  2.Executable Files

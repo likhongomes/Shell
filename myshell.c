@@ -6,7 +6,15 @@
 
 
 
-
+int getSize(char **args){
+  int count = 0;
+  int i = 0;
+  while(args[i]!=NULL){
+    ++count;
+    ++i;
+  }
+  return count;
+}
 
 
 //This is the main function
@@ -158,7 +166,7 @@ void help(char** args) {
   }
 }
 
-int makePipe(char** args1, char** args2) {
+int doPipe(char** args1, char** args2) {
   pid_t pid1, pid2;
   int fd[2];
   //create pipe
@@ -251,9 +259,8 @@ void execute(char **args){
       redirectOut = 1;
     }
     else if(strcmp(args[i], "|") == 0) {
-      printf("sdfasdfadsfadfa");
-      //set | argument to null, then call makePipe passing args before pipe and args after pipe
-      makePipe(&args[0],&args[i+i]);
+      //set | argument to null, then call doPipe passing args before pipe and args after pipe
+      doPipe(&args[0],&args[i+i]);
       args[i] = NULL;
 
     }
@@ -366,7 +373,19 @@ void execute(char **args){
 
         if(pid == 0){
           //printf("in child");
-          execvp(args[0],args);       
+          if(runBg){
+            char *bgArg[getSize(args)];
+            int i = 0;
+            while(i < getSize(args)-1){
+              bgArg[i] = args[i];
+              ++i;
+            }
+            bgArg[i] = NULL;
+            execvp(bgArg[0], bgArg);
+          }else{
+             execvp(args[0],args);  
+          }
+              
           fprintf(stderr, "myshell>: %s: command not found\n",args[0]); /*If execvp failes*/
           exit(1);
         } else if(pid>0){

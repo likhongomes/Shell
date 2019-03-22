@@ -1,4 +1,3 @@
-clear
-emacs a.c
-mkdir ThisCameFromBatFile
-wc myshell.c
+mkdir ThisFolderIsFromBatchFile
+rm input.txt
+ls
